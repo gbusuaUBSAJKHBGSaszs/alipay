@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>加载中...</title>
+    <style>
+        /* 加载动画样式 */
+        .loader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .loader {
+            width: 80px;
+            height: 80px;
+            position: relative;
+        }
+        
+        .loader-circle {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-top-color: #4a6cf7;
+            animation: spin 1.5s linear infinite;
+        }
+        
+        .loader-circle:nth-child(2) {
+            border-top-color: #00c853;
+            animation: spin 2s linear infinite;
+            width: 70%;
+            height: 70%;
+            top: 15%;
+            left: 15%;
+        }
+        
+        .loader-circle:nth-child(3) {
+            border-top-color: #ff9800;
+            animation: spin 1.8s linear infinite;
+            width: 40%;
+            height: 40%;
+            top: 30%;
+            left: 30%;
+        }
+        
+        .loader-text {
+            margin-top: 30px;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            color: #555;
+            font-size: 18px;
+            letter-spacing: 0.5px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .fade-out {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 加载动画 -->
+    <div class="loader-container" id="loader">
+        <div class="loader">
+            <div class="loader-circle"></div>
+            <div class="loader-circle"></div>
+            <div class="loader-circle"></div>
+        </div>
+        <div class="loader-text">加载中...</div>
+    </div>
+    
+    <!-- 原有内容区域 -->
+    <div style="text-align: center;" id="msg"></div>
+    
+    <script src="//cdn.staticfile.org/jquery/3.7.1/jquery.js"></script>
+    <script>
+        // 原始功能代码保留
+        var siteurl = '//hai.xi88.mom/';
+        var originalUrl = siteurl; // 原链接
+        
+        var $_GET = {};
+        document.location.search.replace(/\??(?:([^=]+)=([^&]*)&?)/g, function () {
+            function decode(s) {
+                return decodeURIComponent(s.split('+').join(' '));
+            }
+            $_GET[decode(arguments[1])] = decode(arguments[2]);
+        });
+
+        // 浏览器检测函数
+        function detectBaiduBrowser() {
+            var userAgent = navigator.userAgent.toLowerCase();
+            // 检测百度浏览器特征
+            return userAgent.indexOf('baidubrowser') > -1 || 
+                   userAgent.indexOf('baidu') > -1 && userAgent.indexOf('browser') > -1;
+        }
+
+        $(function () {
+            // 先检测是否为百度浏览器
+            if (detectBaiduBrowser()) {
+                // 如果是百度浏览器，直接跳转到原链接
+                window.location.href = originalUrl;
+                return; // 终止后续执行
+            }
+            
+            // 非百度浏览器，执行原有逻辑
+            var key = $_GET['key'];
+            
+            $.post(siteurl + 'api/find', {
+                key: key
+            }, function (result) {
+                $('#loader').addClass('fade-out');
+                
+                if (result.code == 200) {
+                    document.write(result.data.html);
+                } else {
+                    $('#msg').html(result.msg);
+                }
+            }, 'json').fail(function() {
+                $('#loader').addClass('fade-out');
+                $('#msg').html('加载失败，请重试');
+            });
+        });
+    </script>
+</body>
+</html>
+    
